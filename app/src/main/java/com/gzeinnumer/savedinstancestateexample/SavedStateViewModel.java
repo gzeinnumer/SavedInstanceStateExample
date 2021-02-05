@@ -1,41 +1,38 @@
 package com.gzeinnumer.savedinstancestateexample;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SavedStateViewModel extends ViewModel {
-    public final String KEY = "Saved_Shopping_List";
-    private final SavedStateHandle savedStateHandle;
-    public LiveData<List<String>> items;
 
+    private SavedStateHandle savedStateHandle;
+    public LiveData<String> filteredData;
     public SavedStateViewModel(SavedStateHandle savedStateHandle) {
         this.savedStateHandle = savedStateHandle;
-        items = savedStateHandle.getLiveData(KEY, new ArrayList<>());
+        LiveData<String> queryLiveData = savedStateHandle.getLiveData("query");
+        filteredData = Transformations.switchMap(queryLiveData, query -> {
+            return getFilteredData(query);
+        });
     }
 
-    public void addItemToShoppingList(String d) {
-        items.getValue().add(d);
-        savedStateHandle.set(KEY, items.getValue());
+    private LiveData<String> getFilteredData(String query) {
+        MutableLiveData<String> d = new MutableLiveData<>();
+
+        d.setValue(query + " data 3");
+        return d;
     }
 
-    private List<String> generateItems() {
-        List<String> list = new ArrayList<String>();
-
-        list.add("Milk");
-        list.add("Eggs");
-        list.add("Oranges");
-
-        return list;
+    public void setQuery(String query) {
+        savedStateHandle.set("query", query);
     }
 
-    public void loadShoppingList() {
-        if (items.getValue().isEmpty()) {
-            items.getValue().addAll(generateItems());
-            savedStateHandle.set(KEY, items.getValue());
-        }
+    public LiveData<String> getFilteredData() {
+        return filteredData;
     }
 }

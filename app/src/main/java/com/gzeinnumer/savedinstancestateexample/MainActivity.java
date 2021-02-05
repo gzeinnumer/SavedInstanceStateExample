@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -38,30 +39,18 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String str = ed.getText().toString();
-                if (str.length() > 0) {
-                    int pos = vm.items.getValue().size();
-                    vm.addItemToShoppingList(str);
-                    dummyAdapter.notifyItemInserted(pos > 0 ? pos : 0);
-                }
+                vm.setQuery("data 1");
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
         loadShoppingLists();
     }
 
     private void loadShoppingLists() {
-        vm.loadShoppingList();
-
-        vm.items.observe(this, new Observer<List<String>>() {
+        //akan tetap terpanggil jika
+        vm.getFilteredData().observe(this, new Observer<String>() {
             @Override
-            public void onChanged(List<String> strings) {
-                dummyAdapter.setList(strings);
+            public void onChanged(String s) {
+                Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
             }
         });
     }
